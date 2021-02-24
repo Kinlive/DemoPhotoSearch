@@ -8,6 +8,21 @@
 import Foundation
 
 
-class AppDIContainer {
-    
+protocol AppDIContainerFactory {
+    func makeSearchDIContainer() -> SearchDIContainer
+    func makeFavoriteDIContainer() -> FavoriteDIContainer
+}
+
+class AppDIContainer: AppDIContainerFactory {
+
+    let appDependency = AppDependency()
+
+    func makeSearchDIContainer() -> SearchDIContainer {
+        return SearchDIContainer(dependencies: appDependency)
+    }
+
+    func makeFavoriteDIContainer() -> FavoriteDIContainer {
+        return FavoriteDIContainer(dependencies: appDependency)
+    }
+
 }

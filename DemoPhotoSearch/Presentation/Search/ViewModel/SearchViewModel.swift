@@ -7,6 +7,9 @@
 
 import Foundation
 
+struct SearchViewModelActions {
+    var showResult: () -> Void
+}
 protocol SearchViewModel {
 
 }

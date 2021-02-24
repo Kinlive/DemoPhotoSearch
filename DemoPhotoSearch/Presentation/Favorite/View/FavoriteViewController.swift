@@ -7,7 +7,16 @@
 
 import UIKit
 
-class FaovirteViewController: UIViewController {
+class FavoriteViewController: UIViewController {
+
+    static func instantiate(viewModel: FavoriteViewModel) -> FavoriteViewController {
+        let vc = FavoriteViewController()
+        vc.view.backgroundColor = .white
+        vc.viewModel = viewModel
+        return vc
+    }
+
+    var viewModel: FavoriteViewModel!
 
     override func viewDidLoad() {
         super.viewDidLoad()

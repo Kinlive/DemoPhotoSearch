@@ -7,7 +7,9 @@
 
 import Foundation
 
-class AppDependency {
+// protocol has some dependency
+
+struct AppDependency {
     
 }
 

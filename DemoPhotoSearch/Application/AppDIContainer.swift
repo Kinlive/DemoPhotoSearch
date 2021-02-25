@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+import Moya
 
 protocol AppDIContainerFactory {
     func makeSearchDIContainer() -> SearchDIContainer
@@ -15,7 +15,11 @@ protocol AppDIContainerFactory {
 
 class AppDIContainer: AppDIContainerFactory {
 
-    let appDependency = AppDependency()
+    lazy var appDependency: AppDependency = {
+        let service = SearchService(provider: MoyaProvider<FlickrAPIType>())
+        let dependency = AppDependency(searchService: service)
+        return dependency
+    }()
 
     func makeSearchDIContainer() -> SearchDIContainer {
         return SearchDIContainer(dependencies: appDependency)

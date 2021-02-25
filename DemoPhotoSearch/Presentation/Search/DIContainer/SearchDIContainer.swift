@@ -33,18 +33,18 @@ extension SearchDIContainer: SearchDIContainerFactory {
 
     func makeSearchViewModel(with actions: SearchViewModelActions) -> SearchViewModel {
 
-        return DefaultSearchViewModel()
+        return DefaultSearchViewModel(action: actions)
     }
 }
 
 extension SearchDIContainer: SearchCoordinatorDependencies {
-    func makeSearchViewController() -> SearchViewController {
-
-        return SearchViewController.instantiate(viewModel: DefaultSearchViewModel())
+    func makeResultDIContainer(passValue: PhotosQuery) -> SearchResultDIContainer {
+        return SearchResultDIContainer(dependencies: dependencies, passValue: passValue)
     }
 
-    func makeResultDIContainer() -> SearchResultDIContainer {
+    func makeSearchViewController(action: SearchViewModelActions) -> SearchViewController {
 
-        return SearchResultDIContainer()
+        return SearchViewController.instantiate(viewModel: DefaultSearchViewModel(action: action))
     }
+
 }

@@ -10,8 +10,8 @@ import RxSwift
 import RxCocoa
 
 protocol SearchCoordinatorDependencies {
-    func makeSearchViewController() -> SearchViewController
-    func makeResultDIContainer() -> SearchResultDIContainer
+    func makeSearchViewController(action: SearchViewModelActions) -> SearchViewController
+    func makeResultDIContainer(passValue: PhotosQuery) -> SearchResultDIContainer
 }
 
 class SearchCoordinator: BaseCoordinator {
@@ -34,12 +34,22 @@ class SearchCoordinator: BaseCoordinator {
             .bind(to: subject)
             .disposed(by: bag)
 
-        let searchVC = dependencies.makeSearchViewController()
+        let action = SearchViewModelActions(showResult: actionToResultPage(query:))
+
+        let searchVC = dependencies.makeSearchViewController(action: action)
         searchVC.navigationItem.title = "Search photos"
 
         navigationController?.pushViewController(searchVC, animated: true)
 
         return subject.ignoreElements()
+    }
+
+    private func actionToResultPage(query: PhotosQuery) {
+        let container = dependencies.makeResultDIContainer(passValue: query)
+        let resultCoordinator = container.makeResultCoordinator(at: navigationController)
+
+        _ = coordinator(to: resultCoordinator)
+
     }
 
 }

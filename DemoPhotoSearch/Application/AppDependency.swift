@@ -8,8 +8,16 @@
 import Foundation
 
 // protocol has some dependency
+protocol HasSearchService {
+    var searchService: SearchService { get }
+}
 
-struct AppDependency {
-    
+struct AppDependency: HasSearchService {
+
+    var searchService: SearchService
+
+    init(searchService: SearchService) {
+        self.searchService = searchService
+    }
 }
 

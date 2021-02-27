@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		116AB00C25EA4DD5008CF4BE /* SavePhotoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116AB00B25EA4DD5008CF4BE /* SavePhotoUseCase.swift */; };
+		116AB00E25EA4F88008CF4BE /* UseCases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116AB00D25EA4F88008CF4BE /* UseCases.swift */; };
+		116AB01025EA5734008CF4BE /* FetchFavoriteUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116AB00F25EA5734008CF4BE /* FetchFavoriteUseCase.swift */; };
 		116EE1F225E7F65B00E05A14 /* SearchPhotoUseCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116EE1F125E7F65B00E05A14 /* SearchPhotoUseCase.swift */; };
 		116EE1F625E803E600E05A14 /* PhotoResultCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116EE1F525E803E600E05A14 /* PhotoResultCell.swift */; };
 		116EE1F825E804D800E05A14 /* UIImage+Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = 116EE1F725E804D800E05A14 /* UIImage+Download.swift */; };
@@ -54,6 +57,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		116AB00B25EA4DD5008CF4BE /* SavePhotoUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SavePhotoUseCase.swift; path = DemoPhotoSearch/Application/Utils/AnyCache/SavePhotoUseCase.swift; sourceTree = SOURCE_ROOT; };
+		116AB00D25EA4F88008CF4BE /* UseCases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UseCases.swift; path = DemoPhotoSearch/Application/Utils/AnyCache/UseCases.swift; sourceTree = SOURCE_ROOT; };
+		116AB00F25EA5734008CF4BE /* FetchFavoriteUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FetchFavoriteUseCase.swift; path = DemoPhotoSearch/Application/Utils/AnyCache/FetchFavoriteUseCase.swift; sourceTree = SOURCE_ROOT; };
 		116EE1F125E7F65B00E05A14 /* SearchPhotoUseCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SearchPhotoUseCase.swift; path = DemoPhotoSearch/Data/PersistentStorages/QuerysStorage/SearchPhotoUseCase.swift; sourceTree = SOURCE_ROOT; };
 		116EE1F525E803E600E05A14 /* PhotoResultCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoResultCell.swift; sourceTree = "<group>"; };
 		116EE1F725E804D800E05A14 /* UIImage+Download.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Download.swift"; sourceTree = "<group>"; };
@@ -180,7 +186,6 @@
 		11746B8025E6AEE70037D0D3 /* Infrastructure */ = {
 			isa = PBXGroup;
 			children = (
-				11746B8425E6AEF10037D0D3 /* Services */,
 				11746B8125E6AEE70037D0D3 /* Network */,
 			);
 			name = Infrastructure;
@@ -190,6 +195,7 @@
 		11746B8125E6AEE70037D0D3 /* Network */ = {
 			isa = PBXGroup;
 			children = (
+				11746B8425E6AEF10037D0D3 /* Services */,
 				11746B8225E6AEE70037D0D3 /* EncodableExtension.swift */,
 			);
 			path = Network;
@@ -460,6 +466,9 @@
 			isa = PBXGroup;
 			children = (
 				116EE1F125E7F65B00E05A14 /* SearchPhotoUseCase.swift */,
+				116AB00B25EA4DD5008CF4BE /* SavePhotoUseCase.swift */,
+				116AB00D25EA4F88008CF4BE /* UseCases.swift */,
+				116AB00F25EA5734008CF4BE /* FetchFavoriteUseCase.swift */,
 			);
 			path = UseCase;
 			sourceTree = "<group>";
@@ -660,9 +669,11 @@
 				116EE1F625E803E600E05A14 /* PhotoResultCell.swift in Sources */,
 				FE3BF73425E65523003F3455 /* AppDelegate.swift in Sources */,
 				11746B7A25E6AE2C0037D0D3 /* SearchResponseDTO+Mapping.swift in Sources */,
+				116AB01025EA5734008CF4BE /* FetchFavoriteUseCase.swift in Sources */,
 				FE3C421F25E691DE003FADBE /* AppFlowCoordinator.swift in Sources */,
 				FE3BF79225E65B05003F3455 /* SearchResultViewController.swift in Sources */,
 				11746B8725E6AF100037D0D3 /* BaseService.swift in Sources */,
+				116AB00C25EA4DD5008CF4BE /* SavePhotoUseCase.swift in Sources */,
 				FE3BF77A25E6590C003F3455 /* SearchCoordinator.swift in Sources */,
 				11746B9725E6B5950037D0D3 /* FavoritesPhotosStorage.swift in Sources */,
 				FE3BF77625E658E2003F3455 /* SearchDIContainer.swift in Sources */,
@@ -673,6 +684,7 @@
 				11746B7825E6AE040037D0D3 /* BaseDataTransferObject.swift in Sources */,
 				11746B6F25E6AD8B0037D0D3 /* BaseEntities.swift in Sources */,
 				11746B8B25E6AF7F0037D0D3 /* SearchService.swift in Sources */,
+				116AB00E25EA4F88008CF4BE /* UseCases.swift in Sources */,
 				116EE1FD25E8054300E05A14 /* CacheManager.swift in Sources */,
 				FE3BF79525E65B15003F3455 /* SearchResultViewModel.swift in Sources */,
 				FE3BF78925E65A54003F3455 /* FavoriteViewModel.swift in Sources */,

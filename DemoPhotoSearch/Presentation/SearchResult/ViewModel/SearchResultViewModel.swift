@@ -10,12 +10,11 @@ import RxSwift
 
 struct SearchResultInput {
     let fetchPhotos: Observable<Void>
-    let photoSelected: PublishSubject<(Bool, IndexPath)> // undo
+    let photoSelected: Observable<IndexPath>
     let scrollToBottom: Observable<Bool>
 }
 struct SearchResultOutput {
     let saved: Observable<IndexPath> // undo
-    let removed: Observable<Void> // undo
     let photos: Observable<Photos>
 }
 
@@ -24,14 +23,16 @@ protocol SearchResultViewModel {
 }
 
 final class DefaultSearchResultViewModel: SearchResultViewModel {
+    typealias UseCases = HasPhotosRemoteSearchUseCase & HasSaveFavoriteUseCase
+
     let bag = DisposeBag()
     private var passValue: PhotosQuery
-    private let useCase: SearchRemoteUseCase
+    private let useCase: UseCases
 
     private var currentPage: Int = 0
     private var currentPhotos: Photos?
 
-    init(passValue: PhotosQuery, useCase: SearchRemoteUseCase) {
+    init(passValue: PhotosQuery, useCase: UseCases) {
         self.passValue = passValue
         self.useCase = useCase
         currentPage = passValue.page
@@ -79,14 +80,39 @@ final class DefaultSearchResultViewModel: SearchResultViewModel {
         let newPhotos = Observable.merge(reload, totals)
             .do(onNext: { [weak self] photos in self?.currentPhotos = photos })
 
+        let saveFavorite = input.photoSelected.withLatestFrom(newPhotos) { indexPath, photos in
+                return (indexPath, photos.photo[indexPath.row])
+            }
+            .flatMap { [weak self] (indexPath, photo) in
+                return (self?.savePhotoUseCase(photo: photo) ?? .empty())
+                    .map { _ in indexPath }
+            }
+
         return SearchResultOutput(
-            saved: Observable.just(IndexPath(item: 0, section: 0)),
-            removed: Observable.just(()),
+            saved: saveFavorite,
             photos: newPhotos
         )
     }
 
     private func searchPhotosUseCase(query: PhotosQuery) -> Observable<Photos> {
+        guard let useCase = useCase.searchRemoteUseCase else {
+            return .error(NSError(
+                domain: "useCase not found",
+                code: -990,
+                userInfo: nil)
+            )
+        }
         return useCase.search(query: query)
+    }
+
+    private func savePhotoUseCase(photo: Photo) -> Observable<Void> {
+        guard let useCase = useCase.saveFavoriteUseCase else {
+            return .error(NSError(
+                domain: "useCase not found",
+                code: -990,
+                userInfo: nil)
+            )
+        }
+        return useCase.save(favorite: photo, of: passValue)
     }
 }

@@ -96,6 +96,13 @@ class SearchResultViewController: UIViewController {
         loadingIndicatorView.centerYAnchor.constraint(equalTo: loadingBaseView.centerYAnchor).isActive = true
     }
 
+    private func showSave(indexPath: IndexPath) {
+        let alert = UIAlertController(title: "加入最愛", message: "已將 \(indexPath) 加入最愛", preferredStyle: .alert)
+        let ok = UIAlertAction(title: "確認", style: .default, handler: nil)
+        alert.addAction(ok)
+        present(alert, animated: true, completion: nil)
+    }
+
     func bindViewModel() {
 
         let bottomAndTopEdge: CGFloat = 50
@@ -136,10 +143,11 @@ class SearchResultViewController: UIViewController {
             .bind(to: loadingIndicatorView.rx.isAnimating)
             .disposed(by: bag)
 
+        let savePhoto = photosCollectionView.rx.itemSelected.asObservable()
 
         let output = viewModel.transform(input: .init(
             fetchPhotos: triggerReload,
-            photoSelected: .init(),
+            photoSelected: savePhoto,
             scrollToBottom: onScrollingToBottom)
         )
 
@@ -151,6 +159,13 @@ class SearchResultViewController: UIViewController {
             .bind(to: photos)
             .disposed(by: bag)
 
+        output.saved
+            .observeOn(MainScheduler.instance)
+            .subscribe(onNext: { [weak self] indexPath in
+                self?.showSave(indexPath: indexPath)
+            })
+            .disposed(by: bag)
+
     }
 
 }
@@ -160,8 +175,7 @@ extension SearchResultViewController: UICollectionViewDelegateFlowLayout {
 
   func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
     let itemHeight = collectionView.frame.height * 0.33
-    let itemWidth = collectionView.frame.width * 0.5
-    return CGSize(width: itemWidth, height: itemHeight)
+    return CGSize(width: itemHeight, height: itemHeight)
   }
 
   func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {

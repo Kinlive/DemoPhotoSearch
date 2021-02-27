@@ -9,12 +9,12 @@ import UIKit
 
 protocol SearchResultDIContainerFactory {
     func makeResultCoordinator(at navigation: UINavigationController?) -> SearchResultCoordinator
-    func makeSearchRemoteUseCase() -> SearchRemoteUseCase
+    func makeUseCase() -> UseCases
 }
 
 class SearchResultDIContainer: SearchResultDIContainerFactory {
 
-    typealias Dependencies = HasSearchService
+    typealias Dependencies = HasSearchService & HasCoreDataStorage
     let dependencies: Dependencies
     let passValue: PhotosQuery
 
@@ -28,15 +28,17 @@ class SearchResultDIContainer: SearchResultDIContainerFactory {
         return SearchResultCoordinator(navigationController: navigation, dependencies: self)
     }
 
-    func makeSearchRemoteUseCase() -> SearchRemoteUseCase {
-        return DefaultSearchRemoteUseCase(service: dependencies.searchService)
+    func makeUseCase() -> UseCases {
+        let searchUseCase = DefaultSearchRemoteUseCase(service: dependencies.searchService)
+        let saveUseCase = DefaultSaveFavoriteUseCase(storage: dependencies.coreDataStorage)
+        return UseCases(searchRemoteUseCase: searchUseCase, saveFavoriteUseCase: saveUseCase)
     }
 
 }
 
 extension SearchResultDIContainer: SearchResultCoordinatorDependencies {
     func makeSearchResultViewController() -> SearchResultViewController {
-        let viewModel = DefaultSearchResultViewModel(passValue: passValue, useCase: makeSearchRemoteUseCase())
+        let viewModel = DefaultSearchResultViewModel(passValue: passValue, useCase: makeUseCase())
         return SearchResultViewController.instantiate(viewModel: viewModel)
     }
 }

@@ -11,13 +11,21 @@ import Foundation
 protocol HasSearchService {
     var searchService: SearchService { get }
 }
+protocol HasCoreDataStorage {
+    var coreDataStorage: FavoritesPhotosStorage { get }
+}
 
-struct AppDependency: HasSearchService {
+struct AppDependency: HasSearchService, HasCoreDataStorage {
 
     var searchService: SearchService
+    var coreDataStorage: FavoritesPhotosStorage
 
-    init(searchService: SearchService) {
+    init(
+        searchService: SearchService,
+        coreDataStorage: FavoritesPhotosStorage
+    ) {
         self.searchService = searchService
+        self.coreDataStorage = coreDataStorage
     }
 }
 

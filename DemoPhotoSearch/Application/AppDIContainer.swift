@@ -17,7 +17,8 @@ class AppDIContainer: AppDIContainerFactory {
 
     lazy var appDependency: AppDependency = {
         let service = SearchService(provider: MoyaProvider<FlickrAPIType>())
-        let dependency = AppDependency(searchService: service)
+        let storage = CoreDataFavoritesPhotosStorage()
+        let dependency = AppDependency(searchService: service, coreDataStorage: storage)
         return dependency
     }()
 

@@ -17,7 +17,7 @@ final class CoreDataStorage {
   static let shared = CoreDataStorage()
 
   private lazy var persistentContainer: NSPersistentContainer = {
-    let container = NSPersistentContainer(name: "CoreDataStorage")
+    let container = NSPersistentContainer(name: "DemoPhotoSearch")
     container.loadPersistentStores { (_, error) in
       if let error = error as NSError? {
         assertionFailure("CoreDataStorage unresolve error \(error), \(error.userInfo)")

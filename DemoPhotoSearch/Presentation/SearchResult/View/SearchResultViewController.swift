@@ -19,6 +19,16 @@ class SearchResultViewController: UIViewController {
 
     }
 
+    lazy var baseStackView: UIStackView = {
+        let stack = UIStackView()
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.axis = .vertical
+        stack.alignment = .fill
+        stack.distribution = .fill
+        stack.spacing = 0
+        return stack
+    }()
+
     lazy var photosCollectionView: UICollectionView = {
       var layout = UICollectionViewFlowLayout()
 
@@ -33,6 +43,24 @@ class SearchResultViewController: UIViewController {
       return collection
     }()
 
+    lazy var loadingIndicatorView: UIActivityIndicatorView = {
+        let  act = UIActivityIndicatorView(style: .large)
+        act.translatesAutoresizingMaskIntoConstraints = false
+        act.color = .systemBlue
+        act.stopAnimating()
+        return act
+    }()
+
+    lazy var loadingBaseView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.backgroundColor = .lightGray
+        view.isHidden = true
+        return view
+    }()
+
+    private var loadingHeightConstraints: NSLayoutConstraint!
+
     let bag = DisposeBag()
     var viewModel: SearchResultViewModel!
 
@@ -43,7 +71,11 @@ class SearchResultViewController: UIViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
-        view.addSubview(photosCollectionView)
+        view.addSubview(baseStackView)
+        baseStackView.addArrangedSubview(photosCollectionView)
+        baseStackView.addArrangedSubview(loadingBaseView)
+        loadingBaseView.addSubview(loadingIndicatorView)
+
     }
 
     override func viewWillLayoutSubviews() {
@@ -52,18 +84,70 @@ class SearchResultViewController: UIViewController {
     }
 
     private func layoutConstraint() {
-        photosCollectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
-        photosCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-        photosCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        photosCollectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+
+        baseStackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        baseStackView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        baseStackView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        baseStackView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+
+        loadingBaseView.heightAnchor.constraint(equalToConstant: 50).isActive = true
+
+        loadingIndicatorView.centerXAnchor.constraint(equalTo: loadingBaseView.centerXAnchor).isActive = true
+        loadingIndicatorView.centerYAnchor.constraint(equalTo: loadingBaseView.centerYAnchor).isActive = true
     }
 
     func bindViewModel() {
 
-        let output = viewModel.transform(input: .init(photoSelected: .init(), scrollToBottom: onScrollToBottom))
+        let bottomAndTopEdge: CGFloat = 50
+        let onScrolling = photosCollectionView.rx.delegate.sentMessage(#selector(UIScrollViewDelegate.scrollViewDidEndDragging(_:willDecelerate:)))
+            .throttle(.seconds(2), scheduler: MainScheduler.instance)
+            .map { [weak self] _ -> CGFloat in
+                guard let `self` = self else { return 0 }
+                return self.photosCollectionView.contentOffset.y
+            }
+            .filter { [weak self] _ in self?.photos.value != nil }
+            .share()
+
+        // scroll to top
+        let onScrollingToTop = onScrolling
+            .filter { $0 <= -bottomAndTopEdge }
+
+        let triggerReload = Observable.merge(
+            onScrollingToTop.map { _ in },
+            rx.viewDidLoad.asObservable()
+        )
+
+
+        // scroll to bottom
+        let onScrollingToBottom = onScrolling
+            .map { [weak self] offsetY in
+                guard let `self` = self else { return false }
+                let bottomEdge = (offsetY + self.photosCollectionView.frame.height)
+                return bottomEdge >= (self.photosCollectionView.contentSize.height + bottomAndTopEdge)
+            }
+            .filter { $0 }
+
+        onScrollingToBottom
+            .observeOn(MainScheduler.instance)
+            .do(onNext: { [weak self] _ in
+                self?.loadingBaseView.isHidden = false
+            })
+            .delay(.milliseconds(300), scheduler: MainScheduler.instance)
+            .bind(to: loadingIndicatorView.rx.isAnimating)
+            .disposed(by: bag)
+
+
+        let output = viewModel.transform(input: .init(
+            fetchPhotos: triggerReload,
+            photoSelected: .init(),
+            scrollToBottom: onScrollingToBottom)
+        )
 
         output.photos
-            .do(afterNext: { [weak self] _ in self?.photosCollectionView.reloadData() })
+            .do(afterNext: { [weak self] _ in
+                self?.photosCollectionView.reloadData()
+                self?.loadingBaseView.isHidden = true
+            })
             .bind(to: photos)
             .disposed(by: bag)
 
@@ -109,12 +193,9 @@ extension SearchResultViewController: UICollectionViewDataSource {
     }
 }
 
-extension SearchResultViewController {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let bottomEdge = scrollView.contentOffset.y + scrollView.frame.size.height
-        if bottomEdge >= (scrollView.contentSize.height + 50) {
-            print("At bottom trigger fetch next page's phots.")
-            onScrollToBottom.onNext(())
-        }
+extension Reactive where Base: UIViewController {
+    var viewDidLoad: ControlEvent<Void> {
+        let source = methodInvoked(#selector(Base.viewDidLoad)).map { _ in }
+        return ControlEvent(events: source)
     }
 }
